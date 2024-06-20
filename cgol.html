@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<style>
+    .square {
+    height: 15px;
+    width: 15px;
+    background-color: #4f4f4f;
+    margin-left: 4px;
+    margin-bottom: 0px; 
+    float: left;
+    }
+
+    #row {
+        float:unset;
+    }
+
+    .settings {
+        user-select: none;
+        margin-left: 4px;
+        margin-bottom: 0px;
+        background-color: darkgray;
+        border-color: #4f4f4f;
+        float: left;
+        width: 90px;
+    }
+
+    ::placeholder {
+        color: #292929;
+    }
+
+    #input {
+        user-select: none;
+        margin-left: 4px;
+        margin-bottom: 0px;
+        float: left;
+    }
+
+    body {
+        background-color: #b3b3b3;
+    }
+</style>
+
+<script>
+    let array = []
+    let paused = true
+    let nextArray
+    let length = 40
+    let width = 40
+    initiateArray(length*width, 0)
+
+
+
+    function loop () {
+        let i = 0
+        while (i < 10) {
+            setTimeout(iterate, i*parseInt(Math.abs(document.getElementById("interval").value)))
+            i++
+            if (paused) {}
+        }    
+    }
+
+    function playPause () {
+        if (document.getElementById("paused").innerHTML = "Play") {
+            document.getElementById("paused").innerHTML = "Pause"
+            document.getElementById("paused").id = "playing"
+        } else {
+            document.getElementById("playing").innerHTML = "Play"
+            document.getElementById("playing").id = "paused"
+        }
+    }
+
+    function iterate () {
+        let liveAdjCells = 0
+        nextArray = []
+        for (let i = 0; i < (length*width); i++) {
+            liveAdjCells = liveItemsInList(findAdjacentTiles(positionInArray(i)[0], positionInArray(i)[1], array))
+            if (array[i] == 1) {
+                if (liveAdjCells < 2) {
+                    nextArray.push(0)
+                } else if (liveAdjCells == 2 || liveAdjCells == 3) {
+                    nextArray.push(1)
+                } else {
+                    nextArray.push(0)
+                }
+            } else {
+                if (liveAdjCells == 3) {
+                    nextArray.push(1)
+                } else {
+                    nextArray.push(0)
+                }
+            }
+        }
+        array = nextArray
+        updateGrid(array)
+    }
+
+    function clearGrid () {
+        let blankArray = []
+        for (let i = 0; i < array.length; i++) {
+            blankArray+=0
+        }
+        updateGrid(blankArray)
+    }
+
+    function updateGrid (list) {
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] == 1) {
+                document.getElementById(i.toString()).style.backgroundColor = "#afb219"
+            } else {
+                document.getElementById(i.toString()).style.backgroundColor = "#4f4f4f"
+            }
+        }
+    }
+
+    function liveItemsInList(list) {
+        items = 0
+        for (let i = 0; i < list.length; i++) {
+            if (list[i] == 1) {
+                items++
+            }
+        }
+        return items
+    }
+
+    function findAdjacentTiles (x, y, list) {
+        // Index Codes: 0=top, 1=topright, 2=right, 3=bottomright, 4=bottom, 5=bottomleft, 6=left, 7=topleft
+        let adjacentTiles = []
+        adjacentTiles.push(tileStatus(x, (y-1), list))
+        adjacentTiles.push(tileStatus((x+1), (y-1), list))
+        adjacentTiles.push(tileStatus((x+1), y, list))
+        adjacentTiles.push(tileStatus((x+1), (y+1), list))
+        adjacentTiles.push(tileStatus(x, (y+1), list))
+        adjacentTiles.push(tileStatus((x-1), (y+1), list))
+        adjacentTiles.push(tileStatus((x-1), y, list))
+        adjacentTiles.push(tileStatus((x-1), (y-1), list))
+        return adjacentTiles
+    }
+
+    function tileStatus (x, y, list) {
+        if (x > length || y > width) {
+            return 0
+        } else {
+        return list[y*length+x]
+        }
+    }
+
+    function positionInArray (i) {
+        return [i%length, Math.floor(i/length)]
+    }
+
+    function initiateArray (quantity, fillWith) {
+        for (let i = 0; i < quantity; i++) {
+            array.push(fillWith)
+        }
+    }
+
+    function initiateGrid () {
+        let grid  = document.getElementById("grid")
+        for (let y = 0; y < width; y++) {
+            grid.innerHTML += `<div id=\"row\" class=\"${y}\">`
+            for (let x = 0; x < length; x++) {
+                grid.innerHTML += `<div class=\"square\" onclick=\"toggleColor(this.id)\" id=\"${y*length+x}\">`
+            }
+            grid.innerHTML += "</div></div><br>"
+        }
+    }
+
+    function toggleColor (id) {
+        if (array[parseInt(id)] == 0) {
+            array[parseInt(id)] = 1
+            document.getElementById(id.toString()).style.backgroundColor = "#afb219"
+        } else if (array[parseInt(id)] == 1) {
+            array[parseInt(id)] = 0
+            document.getElementById(id.toString()).style.backgroundColor = "#4f4f4f"
+        }
+    }
+</script>
+
+<html>
+    <head>
+        <title>Conway's Game of Life</title>
+        <link rel=¨stylesheet¨ href=¨grid.css¨>
+        <script src="grid.js"></script>
+    </head>
+    <body onload="initiateGrid()">
+        <button onclick="loop()" class="settings">Iterate</button>
+        <button onclick="clearGrid()" class="settings">Clear</button>
+        <input type="number" step="250" min="0" max="5000" placeholder="Interval (ms)" class="settings" id="interval">
+        <button onclick="playPause()" class="settings" id="paused">Play</button>
+        <br>
+        <p id="grid"></p>
+    </body>
+</html>

@@ -1,0 +1,21 @@
+.square {
+    height: 15px;
+    width: 15px;
+    background-color: #4f4f4f;
+    margin-left: 4px;
+    margin-bottom: 0px; 
+    float: left;
+}
+
+#row {
+    float:unset;
+}
+
+#iterator {
+    user-select: none;
+    margin: 10px;
+}
+
+body {
+    background-color: #b3b3b3;
+}
